@@ -1,22 +1,35 @@
-# selenium_example.py
+from flask import Flask
 from selenium import webdriver
-from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
+import time
 
-def main():
-    options = Options()
-    options.add_argument('--headless')  # Run in headless mode
+app = Flask(__name__)
+
+# إعداد Selenium
+def fetch_title():
+    options = webdriver.ChromeOptions()
+    options.add_argument('--headless')  # لتشغيل Chrome بدون واجهة
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    
+    # إعداد ChromeDriver
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
     
-    driver.get("https://www.google.com")
-    search_box = driver.find_element(By.NAME, "q")
-    search_box.send_keys("Selenium with Python")
-    search_box.submit()
-
-    print(driver.title)  # Print the page title
+    # زيارة موقع ويب
+    driver.get("https://example.com")
+    
+    # استخراج عنوان الصفحة
+    title = driver.title
     driver.quit()
+    return title
 
-if __name__ == "__main__":
-    main()
+@app.route('/')
+def home():
+    # استدعاء وظيفة Selenium للحصول على عنوان الصفحة
+    page_title = fetch_title()
+    return f'The page title is: {page_title}'
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
